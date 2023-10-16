@@ -24,7 +24,7 @@ import java.io.IOException;
  */
 public class OutputFrameController {
     @FXML
-    private GridPane gameBoard;
+    public GridPane gameBoard;
 
     @FXML
     private GridPane scoreBoard;
@@ -45,17 +45,17 @@ public class OutputFrameController {
     private Label playerOScoreLabel;
 
 
-    private boolean playerXTurn;
-    private int playerXScore;
-    private int playerOScore;
-    private int roundsLeft;
+    public static boolean playerXTurn;
+    public static int playerXScore;
+    public static int playerOScore;
+    public static int roundsLeft;
     private boolean isBotFirst;
     private Bot bot;
 
 
     private static final int ROW = 8;
     private static final int COL = 8;
-    private Button[][] buttons = new Button[ROW][COL];
+    public static Button[][] buttons = new Button[ROW][COL];
 
 
     /**
