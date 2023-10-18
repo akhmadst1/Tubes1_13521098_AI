@@ -2,7 +2,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.CheckBox;
 import javafx.stage.Stage;
 
 import javafx.scene.control.Alert;
@@ -22,7 +21,6 @@ import java.io.IOException;
  */
 public class InputFrameController{
 
-    public CheckBox isBotFirst;
     @FXML
     private TextField player1;
 
@@ -31,6 +29,9 @@ public class InputFrameController{
 
     @FXML
     private ComboBox<String> numberOfRounds;
+
+    @FXML
+    private ComboBox<String> playingMethods;
 
 
     /**
@@ -45,6 +46,12 @@ public class InputFrameController{
                 "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28");
         this.numberOfRounds.setItems(numberOfRoundsDropdown);
         this.numberOfRounds.getSelectionModel().select(0);
+
+        ObservableList<String> playingMethodsDropdown = FXCollections.observableArrayList(
+                "", "Human vs MinMax", "MinMax vs Human", "Human vs Local", "Local vs Human",
+                "Local vs MinMax");
+        this.playingMethods.setItems(playingMethodsDropdown);
+        this.playingMethods.getSelectionModel().select(0);
     }
 
 
@@ -58,6 +65,7 @@ public class InputFrameController{
         this.player1.setText("");
         this.player2.setText("");
         this.numberOfRounds.getSelectionModel().select(0);
+        this.playingMethods.getSelectionModel().select(0);
     }
 
 
@@ -80,7 +88,7 @@ public class InputFrameController{
 
             // Get controller of output frame and pass input including player names and number of rounds chosen.
             OutputFrameController outputFC = loader.getController();
-            outputFC.getInput(this.player1.getText(), this.player2.getText(), this.numberOfRounds.getValue(), this.isBotFirst.isSelected());
+            outputFC.getInput(this.player1.getText(), this.player2.getText(), this.numberOfRounds.getValue(), this.playingMethods.getValue());
 
             // Open the new frame.
             Stage secondaryStage = new Stage();
@@ -102,6 +110,7 @@ public class InputFrameController{
         String playerX = this.player1.getText();
         String playerO = this.player2.getText();
         String roundNumber = this.numberOfRounds.getValue();
+        String playing = this.playingMethods.getValue();
 
         if (playerX.length() == 0) {
             new Alert(Alert.AlertType.ERROR, "Player 1 name is blank.").showAndWait();
@@ -120,6 +129,11 @@ public class InputFrameController{
 
         if (roundNumber.length() == 0) {
             new Alert(Alert.AlertType.ERROR, "Number of rounds dropdown menu is blank.").showAndWait();
+            return false;
+        }
+
+        if (playing.length() == 0) {
+            new Alert(Alert.AlertType.ERROR, "Please choose playing method.").showAndWait();
             return false;
         }
 
