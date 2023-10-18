@@ -78,11 +78,11 @@ public class OutputFrameController {
 
         // Start bot
         if (this.playingMethod.equals("Human vs MinMax")) {
-            this.bot1 = new MinMaxBot("O");
+            this.bot1 = new MinMaxBot();
             this.playerXTurn = true;
         }
         if (this.playingMethod.equals("MinMax vs Human")) {
-            this.bot1 = new MinMaxBot("O");
+            this.bot1 = new MinMaxBot();
             this.playerXTurn = false;
             this.moveBot1();
         }
@@ -96,13 +96,8 @@ public class OutputFrameController {
             this.moveBot1();
         }
         if (this.playingMethod.equals("Local vs MinMax")) {
-            this.bot1 = new LocalSearchBot("O");
-            this.bot2 = new MinMaxBot("O");
-            this.moveBot1();
-        }
-        if (this.playingMethod.equals("MinMax vs Local")) {
-            this.bot1 = new MinMaxBot("O");
-            this.bot2 = new LocalSearchBot("O");
+            this.bot1 = new LocalSearchBot("X");
+            this.bot2 = new MinMaxBot();
             this.moveBot1();
         }
     }
@@ -216,7 +211,7 @@ public class OutputFrameController {
                 }
 
 //                // Bot's turn
-                if(!(this.playingMethod.equals("MinMax vs Local") || this.playingMethod.equals("Local vs MinMax")) && this.roundsLeft > 0){
+                if(!(this.playingMethod.equals("Local vs MinMax")) && this.roundsLeft > 0){
                     this.moveBot1();
                 } else {
                     this.moveBot2();
@@ -239,7 +234,7 @@ public class OutputFrameController {
                     this.endOfGame();       // Determine & announce the winner.
                 }
                 // Bot's turn
-                if((this.playingMethod.equals("MinMax vs Local") || this.playingMethod.equals("Local vs MinMax")) && this.roundsLeft > 0){
+                if((this.playingMethod.equals("Local vs MinMax")) && this.roundsLeft > 0){
                     this.moveBot1();
                 }
             }

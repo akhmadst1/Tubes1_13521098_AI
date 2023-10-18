@@ -2,6 +2,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LocalSearchBot extends Bot {
+    private String myChar = " ";
+
+    public LocalSearchBot(String turn) {
+        this.myChar = turn;
+    }
+
     public int[] move() {
         String[][] state = stateCopy();
         List<int[]> result = hillClimbingSideWaysMoves(state);
@@ -40,12 +46,22 @@ public class LocalSearchBot extends Bot {
 
             // Search for adjacency for X's and O's or vice versa
             for (int x = startRow; x <= endRow; x++) {
-                if (board[x][move[1]].equals("X"))
-                    score++;
+                if (this.myChar.equals("X")){
+                    if (board[x][move[1]].equals("O"))
+                        score++;
+                } else{
+                    if (board[x][move[1]].equals("X"))
+                        score++;
+                }
             }
             for (int y = startColumn; y <= endColumn; y++) {
-                if (board[move[0]][y].equals("X"))
-                    score++;
+                if (this.myChar.equals("X")){
+                    if (board[move[0]][y].equals("O"))
+                        score++;
+                } else {
+                    if (board[move[0]][y].equals("X"))
+                        score++;
+                }
             }
             if (score > maxScore) {
                 result.clear();

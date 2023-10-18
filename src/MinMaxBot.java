@@ -105,9 +105,6 @@ public class MinMaxBot extends Bot {
                 Object[] entry = abpruning(appliedBoardMin, depth - 1, alpha, beta, timeout, MAX).get(0);
                 minEval = Math.min(minEval, (double)entry[0]);
 
-                System.out.println(Arrays.toString(move));
-                System.out.println(minEval);
-
                 if (minEval < bestMinScore) {
                     bestMinScore = minEval;
                     bestMinMove = move;

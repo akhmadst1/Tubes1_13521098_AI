@@ -48,7 +48,7 @@ public class InputFrameController{
         this.numberOfRounds.getSelectionModel().select(0);
 
         ObservableList<String> playingMethodsDropdown = FXCollections.observableArrayList(
-                "", "Human vs MinMax", "MinMax vs Human", "Human vs Local", "Local vs Human", "MinMax vs Local",
+                "", "Human vs MinMax", "MinMax vs Human", "Human vs Local", "Local vs Human",
                 "Local vs MinMax");
         this.playingMethods.setItems(playingMethodsDropdown);
         this.playingMethods.getSelectionModel().select(0);
