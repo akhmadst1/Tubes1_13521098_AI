@@ -1,31 +1,33 @@
 import java.util.*;
 
 public class Bot {
-    public boolean hitTimeout;
-    public static boolean isAgentTurn;
+    public boolean hitTimeout = false;
+    public static String MAX = "O";
+    public static String MIN = "X";
 
     public int[] move() {
-        hitTimeout = false;
-        long currentTime = System.currentTimeMillis();
-        long timeout = currentTime + 4000;
-        List<int[]> moves = getAllPossibleMoves();
         String[][] state = stateCopy();
         int[] result = new int[2];
-        for (int i = 1; i <= moves.size(); i++) {
+        long currentTime = System.currentTimeMillis();
+        long timeout = currentTime + 4000;
+
+        List<int[]> moves = getAllPossibleMoves(state);
+
+        for (int i = 1; i <= 4; i++) {
             if (System.currentTimeMillis() > timeout) {
                 break;
             }
-            isAgentTurn = true;
-            Object[] action = abpruning(state, 3, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, isAgentTurn, timeout).get(0);
-//            System.out.println(i + " . " + action[0]);
-
+            Object[] action = abpruning(state, i, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout, MAX).get(0);
             if (!hitTimeout && action[1] != null) {
                 int[] temp = (int[]) action[1];
                 result[0] = temp[0];
                 result[1] = temp[1];
+            } else {
+                int[] fallback = moves.get(0);
+                result[0] = fallback[0];
+                result[1] = fallback[1];
             }
         }
-
         // create move
         return new int[]{result[0], result[1]};
     }
@@ -50,11 +52,11 @@ public class Bot {
         return newboard;
     }
 
-    public List<int[]> getAllPossibleMoves(){
+    public List<int[]> getAllPossibleMoves(String[][] board){
         List<int[]> coordinatesList = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (OutputFrameController.buttons[i][j].getText().equals("")){
+                if (board[i][j].equals("")){
                     int[] coordinate = {i, j};
                     coordinatesList.add(coordinate);
                 }
@@ -65,359 +67,133 @@ public class Bot {
     }
 
     public double evaluate(String[][] board) {
-        double score;
-        if (OutputFrameController.playerXTurn) {
-            score = 20 * (OutputFrameController.playerXScore - OutputFrameController.playerOScore);
-        } else {
-            score = 20 * (OutputFrameController.playerOScore - OutputFrameController.playerXScore);
-        }
-
-        double scorePredict = 0;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (board[i][j].equals("")){
-                    // CHECKING CONDITION WHERE BOT DON'T WANT TO PUT TO CERTAIN BOX
-
-                    if (i - 2 < 0) { // First-to second row, not checking above
-                        if (j - 2 < 0) {    // First-to-second column, not checking left
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i+2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i+2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        } else if (j + 2 >= 8){ // seventh-to-eight column, not checking right
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i+2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i+2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        } else { // third-to sixth column, checking right and left
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i+2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i+2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        }
-                    } else if (i + 2 >= 8) { // seventh-to-eight row, not checking below
-                        if (j - 2 < 0) {    // First-to-second column, not checking left
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i-2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i-2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        } else if (j + 2 >= 8){ // seventh-to-eight column, not checking right
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i-2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i-2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        } else { // third-to sixth column, checking right and left
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i-2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i-2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        }
-                    } else { // third-to-sixth row, checking above and below
-                        if (j - 2 < 0) {    // First-to-second column, not checking left
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i-2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i+2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i-2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i+2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        } else if (j + 2 >= 8){ // seventh-to-eight column, not checking right
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i-2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i+2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i-2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i+2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        } else { // third-to sixth column, checking right and left
-                            if (OutputFrameController.playerXTurn) {
-                                if (board[i-2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i+2][j].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("X")) {
-                                    scorePredict -= 5;
-                                }
-                            } else {
-                                if (board[i-2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i+2][j].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j-2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                                if (board[i][j+2].equals("O")) {
-                                    scorePredict -= 5;
-                                }
-                            }
-                        }
-                    }
-
-                    // CHECKING CONDITION WHERE BOT WANT TO PUT TO THE BOX
-
-                    int startRow, endRow, startColumn, endColumn;
-
-                    if (i - 1 < 0)     // If clicked button in first row, no preceding row exists.
-                        startRow = i;
-                    else               // Otherwise, the preceding row exists for adjacency.
-                        startRow = i - 1;
-
-                    if (i + 1 >= 8)  // If clicked button in last row, no subsequent/further row exists.
-                        endRow = i;
-                    else               // Otherwise, the subsequent row exists for adjacency.
-                        endRow = i + 1;
-
-                    if (j - 1 < 0)     // If clicked on first column, lower bound of the column has been reached.
-                        startColumn = j;
-                    else
-                        startColumn = j - 1;
-
-                    if (j + 1 >= 8)  // If clicked on last column, upper bound of the column has been reached.
-                        endColumn = j;
-                    else
-                        endColumn = j + 1;
-
-                    // Search for adjacency for X's and O's or vice versa, and check them
-                    for (int x = startRow; x <= endRow; x++) {
-                        scorePredict += 10*checkPredict(x, j);
-                    }
-
-                    for (int y = startColumn; y <= endColumn; y++) {
-                        scorePredict += 10*checkPredict(i, y);
+        double score = 0;
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if (board[i][j].equals("O")){
+                        score += 1;
                     }
                 }
             }
-        }
-//        System.out.println("score " + score);
-//        System.out.println("scorepredict " + scorePredict);
-        return score + scorePredict;
-    }
-
-    private double checkPredict(int i, int j){
-        double score = 0;
-        if (OutputFrameController.playerXTurn) {
-            if (OutputFrameController.buttons[i][j].getText().equals("O")) {
-                score++;
-            }
-        } else {
-            if (OutputFrameController.buttons[i][j].getText().equals("X")) {
-                score++;
-            }
-        }
         return score;
     }
 
-    public List<Object[]> abpruning(String[][] board, int depth, double alpha, double beta, boolean agentTurn, long timeout) {
+    public List<Object[]> abpruning(String[][] board, int depth, double alpha, double beta, long timeout, String turn) {
+        List<Object[]> result = new ArrayList<>();
+
         if (System.currentTimeMillis() > timeout) {
             this.hitTimeout = true;
-            List<Object[]> result = new ArrayList<>();
             double util_value = evaluate(board);
-            int[] noresult = {-1,-1};
-            Object[] entry = {util_value, noresult};
+            Object[] entry = {util_value, null};
             result.add(entry);
             return result;
         }
-        if (depth == 0 || OutputFrameController.roundsLeft == 0) {
-            List<Object[]> result = new ArrayList<>();
+        if (depth == 0){
             double util_value = evaluate(board);
-            int[] noresult = {-1,-1};
-            Object[] entry = {util_value, noresult};
+            Object[] entry = {util_value, null};
             result.add(entry);
             return result;
         }
 
-        List<int[]> allMoves = getAllPossibleMoves();
-        System.out.println(depth);
+        List<int[]> allMoves = getAllPossibleMoves(board);
 
-        if (agentTurn) {
+        if (MAX.equals(turn)) {
             double maxEval = Double.NEGATIVE_INFINITY;
-            int[] bestMove = allMoves.get(0);
-            double bestScore = maxEval;
+            int[] bestMaxMove = allMoves.get(0);
+            double bestMaxScore = maxEval;
 
             for (int[] move : allMoves) {
-                String[][] current = copy(board);
-                current = applyAction(current, move);
-//                System.out.println(Arrays.deepToString(current));
+                String[][] currentMax = copy(board);
+                String[][] appliedBoardMax = applyAction(currentMax, move, MAX);
 
-                isAgentTurn = false;
-                Object[] entry = abpruning(current, depth - 1, alpha, beta, isAgentTurn, timeout).get(0);
+                Object[] entry = abpruning(appliedBoardMax, depth - 1, alpha, beta, timeout, MIN).get(0);
                 maxEval = Math.max(maxEval, (double)entry[0]);
 
-                if (maxEval > bestScore) {
-                    bestScore = maxEval;
-                    bestMove = move;
+                if (maxEval > bestMaxScore) {
+                    bestMaxScore = maxEval;
+                    bestMaxMove = move;
                 }
 
                 alpha = Math.max(alpha, maxEval);
 
                 if (beta <= alpha) {
-//                    System.out.println("pruning max");
                     break;
                 }
             }
-//            System.out.println("max " + bestScore);
 
-            List<Object[]> result = new ArrayList<>();
-            Object[] entry = {bestScore, bestMove};
+            Object[] entry = {bestMaxScore, bestMaxMove};
             result.add(entry);
             return result;
 
         } else {
             double minEval = Double.POSITIVE_INFINITY;
-            int[] bestMove = allMoves.get(0);
-            double bestScore = minEval;
+            int[] bestMinMove = allMoves.get(0);
+            double bestMinScore = minEval;
 
             for (int[] move : allMoves) {
-                String[][] current = copy(board);
-                current = applyAction(current, move);
-//                System.out.println(Arrays.deepToString(current));
+                String[][] currentMin = copy(board);
+                String[][] appliedBoardMin = applyAction(currentMin, move, MIN);
 
-                isAgentTurn = true;
-                Object[] entry = abpruning(current, depth - 1, alpha, beta, isAgentTurn, timeout).get(0);
+                Object[] entry = abpruning(appliedBoardMin, depth - 1, alpha, beta, timeout, MAX).get(0);
                 minEval = Math.min(minEval, (double)entry[0]);
 
-                if (minEval < bestScore) {
-                    bestScore = minEval;
-                    bestMove = move;
+                System.out.println(Arrays.toString(move));
+                System.out.println(minEval);
+
+                if (minEval < bestMinScore) {
+                    bestMinScore = minEval;
+                    bestMinMove = move;
                 }
 
                 beta = Math.min(beta, minEval);
 
                 if (beta <= alpha) {
-//                    System.out.println("pruning min");
                     break;
                 }
             }
-//            System.out.println("min " + bestScore);
-
-            List<Object[]> result = new ArrayList<>();
-            Object[] entry = {bestScore, bestMove};
+            Object[] entry = {bestMinScore, bestMinMove};
             result.add(entry);
             return result;
         }
     }
 
-    public String[][] applyAction(String[][] board, int[] coordinate){
+    public String[][] applyAction(String[][] board, int[] coordinate, String turn){
         int x = coordinate[0];
         int y = coordinate[1];
         String[][] newboard = copy(board);
-        if (OutputFrameController.playerXTurn) {
-            newboard[x][y] = "X";
-        } else {
-            newboard[x][y] = "O";
+        newboard[x][y] = turn;
+
+        int startRow, endRow, startColumn, endColumn;
+
+        if (x - 1 < 0)     // If clicked button in first row, no preceding row exists.
+            startRow = x;
+        else               // Otherwise, the preceding row exists for adjacency.
+            startRow = x - 1;
+
+        if (x + 1 >= 8)  // If clicked button in last row, no subsequent/further row exists.
+            endRow = x;
+        else               // Otherwise, the subsequent row exists for adjacency.
+            endRow = x + 1;
+
+        if (y - 1 < 0)     // If clicked on first column, lower bound of the column has been reached.
+            startColumn = y;
+        else
+            startColumn = y - 1;
+
+        if (y + 1 >= 8)  // If clicked on last column, upper bound of the column has been reached.
+            endColumn = y;
+        else
+            endColumn = y + 1;
+
+
+        // Search for adjacency for X's and O's or vice versa, and replace them.
+        for (int i = startRow; i <= endRow; i++) {
+            if (!newboard[i][y].equals(""))
+                newboard[i][y] = turn;
+        }
+        for (int j = startColumn; j <= endColumn; j++) {
+            if (!newboard[x][j].equals(""))
+                newboard[x][j] = turn;
         }
         return newboard;
     }
